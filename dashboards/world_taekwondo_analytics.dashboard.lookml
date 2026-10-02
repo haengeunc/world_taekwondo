@@ -188,11 +188,75 @@
       tab: tab_2_ranking_dynamics
       type: text
       title_text: "📈 Official Monthly Ranking Dynamics & Athlete Momentum (Simply Compete Insights)"
-      subtitle_text: "Tracking month-over-month rank swings, identifying Fast Risers surging up the rankings, and monitoring point accumulation over time."
+      subtitle_text: "Month-over-month rank swings, Fast Risers surging into contention, Steepest Droppers, and MoM point accumulation trends."
       row: 15
       col: 0
       width: 24
       height: 2
+
+    - name: kpi_tab2_fast_risers
+      tab: tab_2_ranking_dynamics
+      title: "Fast Risers (Delta ≥ +5)"
+      model: world_taekwondo
+      explore: athlete_rankings
+      type: single_value
+      fields: [athlete_rankings.count_fast_risers]
+      listen:
+        snapshot_date: athlete_rankings.snapshot_date
+        country: dim_athletes.country_code
+        is_active: dim_athletes.is_active_athlete
+      row: 17
+      col: 0
+      width: 6
+      height: 4
+
+    - name: kpi_tab2_droppers
+      tab: tab_2_ranking_dynamics
+      title: "Rank Droppers (Delta ≤ -3)"
+      model: world_taekwondo
+      explore: athlete_rankings
+      type: single_value
+      fields: [athlete_rankings.count_droppers]
+      listen:
+        snapshot_date: athlete_rankings.snapshot_date
+        country: dim_athletes.country_code
+        is_active: dim_athletes.is_active_athlete
+      row: 17
+      col: 6
+      width: 6
+      height: 4
+
+    - name: kpi_tab2_max_gain
+      tab: tab_2_ranking_dynamics
+      title: "Peak Monthly Climb (MoM)"
+      model: world_taekwondo
+      explore: athlete_rankings
+      type: single_value
+      fields: [athlete_rankings.max_rank_gain]
+      listen:
+        snapshot_date: athlete_rankings.snapshot_date
+        country: dim_athletes.country_code
+        is_active: dim_athletes.is_active_athlete
+      row: 17
+      col: 12
+      width: 6
+      height: 4
+
+    - name: kpi_tab2_biggest_drop
+      tab: tab_2_ranking_dynamics
+      title: "Steepest Monthly Slide (MoM)"
+      model: world_taekwondo
+      explore: athlete_rankings
+      type: single_value
+      fields: [athlete_rankings.biggest_drop]
+      listen:
+        snapshot_date: athlete_rankings.snapshot_date
+        country: dim_athletes.country_code
+        is_active: dim_athletes.is_active_athlete
+      row: 17
+      col: 18
+      width: 6
+      height: 4
 
     - name: top_fast_risers_chart
       tab: tab_2_ranking_dynamics
@@ -215,9 +279,35 @@
         snapshot_date: athlete_rankings.snapshot_date
         country: dim_athletes.country_code
         is_active: dim_athletes.is_active_athlete
-      row: 17
+      row: 21
       col: 0
-      width: 11
+      width: 12
+      height: 8
+
+    - name: top_droppers_chart
+      tab: tab_2_ranking_dynamics
+      title: "Top 10 Steepest Droppers (Largest Negative Monthly Rank Delta)"
+      model: world_taekwondo
+      explore: athlete_rankings
+      type: looker_column
+      fields: [dim_athletes.full_name, dim_athletes.country_code, athlete_rankings.weight_or_form_class, athlete_rankings.rank_delta]
+      filters:
+        athlete_rankings.rank_movement_status: "Dropping"
+      sorts: [athlete_rankings.rank_delta asc]
+      limit: 10
+      show_view_names: false
+      show_value_labels: true
+      series_colors:
+        athlete_rankings.rank_delta: "#d93025"
+      show_y_axis_labels: true
+      y_axis_label: "Positions Dropped (↓)"
+      listen:
+        snapshot_date: athlete_rankings.snapshot_date
+        country: dim_athletes.country_code
+        is_active: dim_athletes.is_active_athlete
+      row: 21
+      col: 12
+      width: 12
       height: 8
 
     - name: mom_point_accumulation_trends
@@ -240,14 +330,14 @@
       listen:
         country: dim_athletes.country_code
         is_active: dim_athletes.is_active_athlete
-      row: 17
-      col: 11
-      width: 13
+      row: 29
+      col: 0
+      width: 24
       height: 8
 
     - name: official_monthly_ranking_table
       tab: tab_2_ranking_dynamics
-      title: "Official World Taekwondo Monthly Standings Table"
+      title: "Official World Taekwondo Monthly Standings Table (Simply Compete View)"
       model: world_taekwondo
       explore: athlete_rankings
       type: table
@@ -255,11 +345,14 @@
         athlete_rankings.current_rank,
         athlete_rankings.rank_delta_symbol,
         dim_athletes.wt_member_license,
+        dim_athletes.first_name,
+        dim_athletes.last_name,
         dim_athletes.full_name,
         dim_athletes.country_code,
         athlete_rankings.weight_or_form_class,
         athlete_rankings.total_points,
         athlete_rankings.rank_movement_status,
+        athlete_rankings.olympic_cutoff_tier,
         dim_athletes.athlete_status
       ]
       sorts: [athlete_rankings.weight_or_form_class asc, athlete_rankings.current_rank asc]
@@ -271,10 +364,10 @@
         snapshot_date: athlete_rankings.snapshot_date
         country: dim_athletes.country_code
         is_active: dim_athletes.is_active_athlete
-      row: 25
+      row: 37
       col: 0
       width: 24
-      height: 9
+      height: 10
 
     # =========================================================================
     # TAB 3: OLYMPIC & WORLD CHAMPIONSHIP RACE
@@ -284,7 +377,7 @@
       type: text
       title_text: "🥇 Olympic Qualification Race & Participation vs. Performance Correlation"
       subtitle_text: "Real-time tracking of the prestigious Top 6 Automatic Olympic Cutoff across all 8 Olympic Kyorugi weight categories, paired with tournament volume ROI."
-      row: 34
+      row: 47
       col: 0
       width: 24
       height: 2
@@ -315,7 +408,7 @@
         snapshot_date: athlete_rankings.snapshot_date
         country: dim_athletes.country_code
         is_active: dim_athletes.is_active_athlete
-      row: 36
+      row: 49
       col: 0
       width: 14
       height: 10
@@ -337,7 +430,7 @@
       listen:
         country: dim_athletes.country_code
         is_active: dim_athletes.is_active_athlete
-      row: 36
+      row: 49
       col: 14
       width: 10
       height: 10
@@ -350,7 +443,7 @@
       type: text
       title_text: "🥋 Poomsae vs. Kyorugi Discipline Deep Dive & Cross-Discipline Analysis"
       subtitle_text: "Comparative demographic curves, gender distributions, and athlete profiles crossing over between full-contact Sparring and Recognized/Freestyle Forms."
-      row: 46
+      row: 59
       col: 0
       width: 24
       height: 2
@@ -370,7 +463,7 @@
       listen:
         country: dim_athletes.country_code
         is_active: dim_athletes.is_active_athlete
-      row: 48
+      row: 61
       col: 0
       width: 6
       height: 7
@@ -390,7 +483,7 @@
       listen:
         country: dim_athletes.country_code
         is_active: dim_athletes.is_active_athlete
-      row: 48
+      row: 61
       col: 6
       width: 6
       height: 7
@@ -416,7 +509,7 @@
       listen:
         country: dim_athletes.country_code
         is_active: dim_athletes.is_active_athlete
-      row: 48
+      row: 61
       col: 12
       width: 12
       height: 7
@@ -446,7 +539,7 @@
       listen:
         country: dim_athletes.country_code
         is_active: dim_athletes.is_active_athlete
-      row: 55
+      row: 68
       col: 0
       width: 24
       height: 8

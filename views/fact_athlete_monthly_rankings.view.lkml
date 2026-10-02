@@ -152,6 +152,20 @@ view: fact_athlete_monthly_rankings {
     filters: [rank_movement_status: "Fast Riser"]
   }
 
+  measure: count_droppers {
+    type: count_distinct
+    description: "Count of athletes dropping 3 or more spots in the cycle"
+    sql: ${athlete_id} ;;
+    filters: [rank_movement_status: "Dropping"]
+  }
+
+  measure: count_stable {
+    type: count_distinct
+    description: "Count of athletes maintaining rank stability (-2 to +2)"
+    sql: ${athlete_id} ;;
+    filters: [rank_movement_status: "Stable"]
+  }
+
   measure: count_automatic_qualifiers {
     type: count_distinct
     description: "Count of athletes situated within the Top 6 Olympic qualification cutoff"
