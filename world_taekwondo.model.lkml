@@ -6,6 +6,7 @@ include: "/dashboards/*.dashboard.lookml"
 
 label: "World Taekwondo Analytics"
 
+# Datagroup for caching updates
 datagroup: world_taekwondo_default_datagroup {
   max_cache_age: "24 hours"
   sql_trigger: SELECT MAX(snapshot_date) FROM `opm-looker-core-demo-instance.world_taekwondo.fact_athlete_monthly_rankings` ;;
@@ -13,6 +14,9 @@ datagroup: world_taekwondo_default_datagroup {
 
 persist_with: world_taekwondo_default_datagroup
 
+# ---------------------------------------------------------------------------
+# Explore 1: Tournament Performance & Match Analytics
+# ---------------------------------------------------------------------------
 explore: tournament_performance {
   label: "Tournament Performance & Match Analytics"
   description: "Examines tournament placements, medal conversions, points awarded, and match participation across Kyorugi and Poomsae"
@@ -32,6 +36,9 @@ explore: tournament_performance {
   }
 }
 
+# ---------------------------------------------------------------------------
+# Explore 2: Official Monthly Athlete Rankings & Momentum
+# ---------------------------------------------------------------------------
 explore: athlete_rankings {
   label: "Monthly Athlete Rankings & Momentum"
   description: "Official World Taekwondo monthly ranking snapshots, rank deltas (Fast Risers, Stable, Dropping), and Olympic qualification cutoff trackers"

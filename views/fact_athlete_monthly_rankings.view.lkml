@@ -1,109 +1,171 @@
 view: fact_athlete_monthly_rankings {
   sql_table_name: `opm-looker-core-demo-instance.world_taekwondo.fact_athlete_monthly_rankings` ;;
 
+  # ---------------------------------------------------------------------------
+  # Primary Key
+  # ---------------------------------------------------------------------------
   dimension: ranking_id {
     primary_key: yes
     type: string
+    description: "Unique ranking snapshot record identifier (e.g. RNK-000001)"
     sql: ${TABLE}.ranking_id ;;
-    hidden: yes
   }
 
+  # ---------------------------------------------------------------------------
+  # Foreign Keys & Core Dimensions
+  # ---------------------------------------------------------------------------
   dimension: athlete_id {
     type: string
+    description: "Foreign key referencing dim_athletes"
     sql: ${TABLE}.athlete_id ;;
-    hidden: yes
+  }
+
+  dimension: snapshot_year {
+    type: number
+    description: "Calendar year of ranking snapshot"
+    sql: ${TABLE}.snapshot_year ;;
+  }
+
+  dimension: snapshot_month {
+    type: number
+    description: "Calendar month of ranking snapshot (1-12)"
+    sql: ${TABLE}.snapshot_month ;;
   }
 
   dimension_group: snapshot {
     type: time
     timeframes: [raw, date, month, quarter, year]
-    convert_tz: no
-    datatype: date
+    description: "Official publication date of monthly World/Olympic rankings (1st of month)"
     sql: ${TABLE}.snapshot_date ;;
   }
 
   dimension: ranking_category {
-    label: "Ranking Category"
     type: string
+    description: "Ranking circuit classification: Olympic Kyorugi, World Kyorugi, World Poomsae, Para Kyorugi"
     sql: ${TABLE}.ranking_category ;;
   }
 
   dimension: division_name {
-    label: "Division Name"
     type: string
+    description: "Division classification, e.g. Olympic Senior Division"
     sql: ${TABLE}.division_name ;;
   }
 
   dimension: weight_or_form_class {
-    label: "Weight / Form Class"
     type: string
+    description: "Weight category or Poomsae discipline (e.g. M-58 kg, F-49 kg, Individual Recognized)"
     sql: ${TABLE}.weight_or_form_class ;;
   }
 
   dimension: current_rank {
-    label: "Current Rank"
     type: number
+    description: "Current official standing in division (1 = World #1)"
     sql: ${TABLE}.current_rank ;;
   }
 
   dimension: rank_delta {
-    label: "Rank Delta (Prior MoM)"
     type: number
+    description: "Signed integer representing positions gained (+) or lost (-) since prior monthly snapshot"
     sql: ${TABLE}.rank_delta ;;
   }
 
+  dimension: total_ranking_points {
+    type: number
+    description: "Total accumulated official World/Olympic ranking points"
+    sql: ${TABLE}.total_ranking_points ;;
+    value_format_name: decimal_2
+  }
+
+  # ---------------------------------------------------------------------------
+  # Derived / Calculated Dimensions
+  # ---------------------------------------------------------------------------
   dimension: rank_movement_status {
-    label: "Rank Movement Status"
-    description: "Fast Riser (>= +5), Stable (-2 to +2), Dropping (<= -3)"
     type: string
+    description: "Momentum tier: Fast Riser (delta >= +5), Stable (-2 to +2), Dropping (delta <= -3)"
     sql: CASE
-           WHEN ${rank_delta} >= 5 THEN 'Fast Riser'
-           WHEN ${rank_delta} <= -3 THEN 'Dropping'
-           ELSE 'Stable'
-         END ;;
+      WHEN ${rank_delta} >= 5 THEN 'Fast Riser'
+      WHEN ${rank_delta} <= -3 THEN 'Dropping'
+      ELSE 'Stable'
+    END ;;
   }
 
   dimension: olympic_cutoff_tier {
-    label: "Olympic Cutoff Tier"
-    description: "Tags top 6 automatic Olympic qualification quota positions"
     type: string
+    description: "Olympic qualification tier: Top 6 Automatic Cutoff vs. Outside Cutoff"
     sql: CASE
-           WHEN ${current_rank} <= 6 THEN 'Top 6 (Olympic Quota Spot)'
-           WHEN ${current_rank} <= 10 THEN 'Challenger (Rank 7-10)'
-           ELSE 'Field (Rank 11+)'
-         END ;;
+      WHEN ${current_rank} <= 6 THEN 'Top 6 Automatic Cutoff'
+      ELSE 'Outside Cutoff'
+    END ;;
   }
 
-  dimension: ranking_points {
-    label: "Ranking Points (Base)"
-    type: number
-    sql: ${TABLE}.total_ranking_points ;;
-    hidden: yes
+  dimension: rank_delta_symbol {
+    type: string
+    description: "Visual indicator for monthly rank momentum (e.g. ↑ 5, ↓ 3, -)"
+    sql: CASE
+      WHEN ${rank_delta} > 0 THEN CONCAT('↑ ', CAST(${rank_delta} AS STRING))
+      WHEN ${rank_delta} < 0 THEN CONCAT('↓ ', CAST(ABS(${rank_delta}) AS STRING))
+      ELSE '-'
+    END ;;
+  }
+
+  dimension: is_top_ranked {
+    type: yesno
+    description: "True if athlete holds Rank 1 in their division"
+    sql: ${current_rank} = 1 ;;
+  }
+
+  # ---------------------------------------------------------------------------
+  # Measures
+  # ---------------------------------------------------------------------------
+  measure: count {
+    type: count
+    description: "Total monthly ranking snapshot records"
+    drill_fields: [ranking_id, athlete_id, snapshot_date, weight_or_form_class, current_rank, rank_delta, total_ranking_points]
   }
 
   measure: total_points {
-    label: "Total Accumulated Points"
     type: sum
-    sql: ${ranking_points} ;;
+    description: "Sum of global ranking points"
+    sql: ${total_ranking_points} ;;
     value_format_name: decimal_2
   }
 
   measure: average_points_per_athlete {
-    label: "Average Global Points"
     type: average
-    sql: ${ranking_points} ;;
+    description: "Average ranking points per athlete"
+    sql: ${total_ranking_points} ;;
     value_format_name: decimal_2
   }
 
   measure: max_rank_gain {
-    label: "Max Rank Gain"
     type: max
+    description: "Maximum positions gained in ranking cycle (highest positive rank delta)"
     sql: ${rank_delta} ;;
   }
 
   measure: biggest_drop {
-    label: "Biggest Rank Drop"
     type: min
+    description: "Maximum positions dropped in ranking cycle (most negative rank delta)"
     sql: ${rank_delta} ;;
+  }
+
+  measure: count_ranked_athletes {
+    type: count_distinct
+    description: "Count of unique ranked athletes"
+    sql: ${athlete_id} ;;
+  }
+
+  measure: count_fast_risers {
+    type: count_distinct
+    description: "Count of athletes gaining 5 or more spots in the cycle"
+    sql: ${athlete_id} ;;
+    filters: [rank_movement_status: "Fast Riser"]
+  }
+
+  measure: count_automatic_qualifiers {
+    type: count_distinct
+    description: "Count of athletes situated within the Top 6 Olympic qualification cutoff"
+    sql: ${athlete_id} ;;
+    filters: [olympic_cutoff_tier: "Top 6 Automatic Cutoff"]
   }
 }
