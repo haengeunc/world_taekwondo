@@ -20,21 +20,11 @@ view: fact_athlete_monthly_rankings {
     sql: ${TABLE}.athlete_id ;;
   }
 
-  dimension: snapshot_year {
-    type: number
-    description: "Calendar year of ranking snapshot"
-    sql: ${TABLE}.snapshot_year ;;
-  }
-
-  dimension: snapshot_month {
-    type: number
-    description: "Calendar month of ranking snapshot (1-12)"
-    sql: ${TABLE}.snapshot_month ;;
-  }
-
   dimension_group: snapshot {
     type: time
     timeframes: [raw, date, month, quarter, year]
+    convert_tz: no
+    datatype: date
     description: "Official publication date of monthly World/Olympic rankings (1st of month)"
     sql: ${TABLE}.snapshot_date ;;
   }
