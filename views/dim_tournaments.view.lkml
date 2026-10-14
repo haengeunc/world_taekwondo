@@ -47,6 +47,8 @@ view: dim_tournaments {
   dimension_group: start {
     type: time
     timeframes: [raw, date, week, month, quarter, year]
+    convert_tz: no
+    datatype: date
     description: "Tournament commencement date"
     sql: ${TABLE}.start_date ;;
   }
