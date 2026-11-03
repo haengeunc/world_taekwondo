@@ -329,7 +329,7 @@ view: dim_athletes {
           WHEN ${weight_kg} <= 57.0 THEN 'Featherweight'
           WHEN ${weight_kg} <= 62.0 THEN 'Lightweight'
           WHEN ${weight_kg} <= 67.0 THEN 'Welterweight'
-          WHEN ${weight_kg} <= 74.0 THEN 'Middleweight'
+          WHEN ${weight_kg} <= 73.0 THEN 'Middleweight'
           ELSE 'Heavyweight'
         END
 
@@ -427,8 +427,8 @@ view: dim_athletes {
       WHEN ${athlete_age} >= 18 AND ${gender} = 'F' AND ${weight_kg} <= 57.0 THEN 'Senior Women - Featherweight (53.1-57.0 kg)'
       WHEN ${athlete_age} >= 18 AND ${gender} = 'F' AND ${weight_kg} <= 62.0 THEN 'Senior Women - Lightweight (57.1-62.0 kg)'
       WHEN ${athlete_age} >= 18 AND ${gender} = 'F' AND ${weight_kg} <= 67.0 THEN 'Senior Women - Welterweight (62.1-67.0 kg)'
-      WHEN ${athlete_age} >= 18 AND ${gender} = 'F' AND ${weight_kg} <= 74.0 THEN 'Senior Women - Middleweight (67.1-74.0 kg)'
-      WHEN ${athlete_age} >= 18 AND ${gender} = 'F' THEN 'Senior Women - Heavyweight (>74.0 kg)'
+      WHEN ${athlete_age} >= 18 AND ${gender} = 'F' AND ${weight_kg} <= 73.0 THEN 'Senior Women - Middleweight (67.1-73.0 kg)'
+      WHEN ${athlete_age} >= 18 AND ${gender} = 'F' THEN 'Senior Women - Heavyweight (>73.0 kg)'
       -- JUNIOR MEN (15-17)
       WHEN ${athlete_age} BETWEEN 15 AND 17 AND ${gender} = 'M' AND ${weight_kg} <= 45.0 THEN 'Junior Men - Finweight (<=45.0 kg)'
       WHEN ${athlete_age} BETWEEN 15 AND 17 AND ${gender} = 'M' AND ${weight_kg} <= 48.0 THEN 'Junior Men - Flyweight (45.1-48.0 kg)'
