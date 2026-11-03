@@ -19,7 +19,7 @@ persist_with: world_taekwondo_default_datagroup
 # ---------------------------------------------------------------------------
 explore: tournament_performance {
   label: "Tournament Performance & Match Analytics"
-  description: "Examines tournament placements, medal conversions, points awarded, and match participation across Kyorugi and Poomsae"
+  description: "Examines tournament placements, medal conversions, points awarded, and match participation across official World Taekwondo Kyorugi weight tiers and Poomsae (Recognized & Freestyle) age divisions"
   from: fact_tournament_results
   view_name: tournament_performance
 
@@ -41,7 +41,7 @@ explore: tournament_performance {
 # ---------------------------------------------------------------------------
 explore: athlete_rankings {
   label: "Monthly Athlete Rankings & Momentum"
-  description: "Official World Taekwondo monthly ranking snapshots, rank deltas (Fast Risers, Stable, Dropping), and Olympic qualification cutoff trackers"
+  description: "Official World Taekwondo monthly ranking snapshots, rank deltas (Fast Risers, Stable, Dropping), Olympic qualification cutoff trackers, and WT Kyorugi weight & Poomsae age tiers"
   from: fact_athlete_monthly_rankings
   view_name: athlete_rankings
 
