@@ -37,6 +37,136 @@ view: dim_athletes {
     type: string
     description: "Full registered competitor name"
     sql: ${TABLE}.full_name ;;
+    drill_fields: [athlete_id, gender, athlete_age, country_code, primary_discipline, poomsae_recognized_age_tier, poomsae_recognized_pair_team_age_tier, kyorugi_weight_tier]
+
+    link: {
+      label: "🥋 View All Tournament & Medal Results"
+      url: "/explore/world_taekwondo/tournament_performance?fields=dim_tournaments.start_date,dim_tournaments.tournament_name,dim_tournaments.level,dim_tournaments.location_full,dim_athletes.full_name,dim_athletes.country_code,tournament_performance.discipline,tournament_performance.weight_or_form_class,tournament_performance.rank_achieved,tournament_performance.medal_color,tournament_performance.points_awarded&f[dim_athletes.full_name]={{ value | encode_uri }}&sorts=dim_tournaments.start_date+desc&limit=50"
+      icon_url: "https://www.google.com/s2/favicons?domain=looker.com&sz=64"
+    }
+
+    link: {
+      label: "📈 View Monthly World Ranking Trajectory"
+      url: "/explore/world_taekwondo/athlete_rankings?fields=athlete_rankings.snapshot_month,dim_athletes.full_name,dim_athletes.country_code,athlete_rankings.ranking_category,athlete_rankings.weight_or_form_class,athlete_rankings.current_rank,athlete_rankings.rank_delta_symbol,athlete_rankings.total_points,athlete_rankings.rank_movement_status&f[dim_athletes.full_name]={{ value | encode_uri }}&sorts=athlete_rankings.snapshot_month+desc&limit=24"
+      icon_url: "https://www.google.com/s2/favicons?domain=looker.com&sz=64"
+    }
+
+    action: {
+      label: "📣 Send National Squad Call-Up (Slack / MNA Coach)"
+      url: "https://httpbin.org/post"
+      icon_url: "https://www.google.com/s2/favicons?domain=slack.com&sz=64"
+      param: {
+        name: "athlete_name"
+        value: "{{ value }}"
+      }
+      param: {
+        name: "country_code"
+        value: "{{ country_code._value }}"
+      }
+      form_param: {
+        name: "channel"
+        label: "Notification Channel"
+        type: select
+        required: yes
+        default: "wt_poomsae_high_perf"
+        option: {
+          name: "wt_poomsae_high_perf"
+          label: "#wt-poomsae-high-performance (WT Technical Committee)"
+        }
+        option: {
+          name: "mna_squad_selection"
+          label: "#mna-national-squad-selection (National Federation Coaches)"
+        }
+        option: {
+          name: "championship_seeding_desk"
+          label: "#championship-seeding-desk (Event Draw & Seeding)"
+        }
+      }
+      form_param: {
+        name: "target_event"
+        label: "Target Sanctioned Event"
+        type: select
+        required: yes
+        default: "world_poomsae_2026"
+        option: {
+          name: "world_poomsae_2026"
+          label: "2026 World Taekwondo Poomsae Championships (Pair & Team Seed)"
+        }
+        option: {
+          name: "wt_grand_prix_2026"
+          label: "2026 WT Grand Prix Final Invite"
+        }
+        option: {
+          name: "taekwondowon_camp"
+          label: "Muju Taekwondowon High-Performance Camp"
+        }
+      }
+      form_param: {
+        name: "message"
+        label: "Call-Up Briefing Message"
+        type: textarea
+        required: yes
+        default: "Nominating {{ value }}{% if country_code._in_query %} ({{ country_code._value }}){% endif %} for national squad selection{% if poomsae_recognized_pair_team_age_tier._in_query %} in {{ poomsae_recognized_pair_team_age_tier._value }}{% endif %}{% if tournament_performance.total_tournament_points._in_query %} with {{ tournament_performance.total_tournament_points._rendered_value }} verified tournament points{% endif %}."
+      }
+    }
+
+    action: {
+      label: "📋 Request WT Referee Technical Form Evaluation"
+      url: "https://httpbin.org/post"
+      icon_url: "https://www.google.com/s2/favicons?domain=olympics.com&sz=64"
+      param: {
+        name: "athlete_name"
+        value: "{{ value }}"
+      }
+      form_param: {
+        name: "compulsory_poomsae"
+        label: "Compulsory Recognized Poomsae Draw"
+        type: select
+        required: yes
+        default: "pyongwon_sipjin"
+        option: {
+          name: "koryo_keumgang"
+          label: "Koryo & Keumgang"
+        }
+        option: {
+          name: "taebaek_pyongwon"
+          label: "Taebaek & Pyongwon"
+        }
+        option: {
+          name: "pyongwon_sipjin"
+          label: "Pyongwon & Sipjin (Under 50 Pair & Team Draw)"
+        }
+        option: {
+          name: "jitae_chonkwon"
+          label: "Jitae & Chonkwon"
+        }
+      }
+      form_param: {
+        name: "evaluation_focus"
+        label: "International Referee Review Focus"
+        type: select
+        required: yes
+        default: "pair_team_synchronicity"
+        option: {
+          name: "pair_team_synchronicity"
+          label: "Presentation (6.0): Pair/Team Synchronicity, Speed & Power"
+        }
+        option: {
+          name: "technical_accuracy"
+          label: "Accuracy (4.0): Basic Movement & Major/Minor Deductions (-0.1 / -0.3)"
+        }
+        option: {
+          name: "full_championship_prep"
+          label: "Full 10.0 Championship Readiness Audit"
+        }
+      }
+      form_param: {
+        name: "referee_notes"
+        label: "Class 1 / Class 2 International Referee Notes"
+        type: textarea
+        default: "Queue video review for {{ value }}{% if country_code._in_query %} ({{ country_code._value }}){% endif %} ahead of Pair & Team championship seeding."
+      }
+    }
   }
 
   dimension: gender {
@@ -44,6 +174,7 @@ view: dim_athletes {
     description: "Competitor gender: M (Men's / Male) or F (Women's / Female)"
     synonyms: ["sex", "mens or womens division"]
     sql: ${TABLE}.gender ;;
+    drill_fields: [primary_discipline, country_code, full_name]
   }
 
   dimension: country_code {
@@ -52,6 +183,50 @@ view: dim_athletes {
     synonyms: ["nation", "federation", "country"]
     sql: ${TABLE}.country_code ;;
     map_layer_name: countries
+    drill_fields: [primary_discipline, full_name, gender, athlete_age, poomsae_recognized_pair_team_age_tier, kyorugi_weight_tier]
+
+    link: {
+      label: "🏛️ Open WT Executive Dashboard ({{ value }})"
+      url: "/dashboards/world_taekwondo::world_taekwondo_analytics?Nation+%2F+Federation={{ value | encode_uri }}"
+      icon_url: "https://www.google.com/s2/favicons?domain=looker.com&sz=64"
+    }
+
+    link: {
+      label: "🏅 Explore All Active {{ value }} Athletes"
+      url: "/explore/world_taekwondo/tournament_performance?fields=dim_athletes.full_name,dim_athletes.primary_discipline,dim_athletes.poomsae_recognized_pair_team_age_tier,dim_athletes.kyorugi_weight_tier,tournament_performance.tournaments_entered,tournament_performance.total_medals,tournament_performance.total_tournament_points&f[dim_athletes.country_code]={{ value | encode_uri }}&f[dim_athletes.is_active_athlete]=Yes&sorts=tournament_performance.total_tournament_points+desc&limit=50"
+      icon_url: "https://www.google.com/s2/favicons?domain=looker.com&sz=64"
+    }
+
+    action: {
+      label: "📨 Dispatch MNA Federation Performance Briefing"
+      url: "https://httpbin.org/post"
+      icon_url: "https://www.google.com/s2/favicons?domain=cloud.google.com&sz=64"
+      param: {
+        name: "mna_country_code"
+        value: "{{ value }}"
+      }
+      form_param: {
+        name: "recipient_role"
+        label: "National Federation Recipient"
+        type: select
+        required: yes
+        default: "mna_high_perf_director"
+        option: {
+          name: "mna_high_perf_director"
+          label: "{{ value }} MNA High-Performance Director"
+        }
+        option: {
+          name: "mna_secretary_general"
+          label: "{{ value }} MNA Secretary General"
+        }
+      }
+      form_param: {
+        name: "briefing_note"
+        label: "Executive Summary"
+        type: textarea
+        default: "Sharing governed World Taekwondo standings and 2026 High-Performance Grant eligibility summary for {{ value }} athletes."
+      }
+    }
   }
 
   dimension: birth_year {
@@ -80,6 +255,7 @@ view: dim_athletes {
     type: string
     description: "Current federation registration status: Active, Suspended, or Retired"
     sql: ${TABLE}.athlete_status ;;
+    drill_fields: [primary_discipline, country_code, full_name]
   }
 
   dimension: primary_discipline {
@@ -87,6 +263,7 @@ view: dim_athletes {
     description: "Discipline profile: Kyorugi (Sparring), Poomsae (Forms), or Both"
     synonyms: ["sparring or forms", "taekwondo discipline"]
     sql: ${TABLE}.primary_discipline ;;
+    drill_fields: [poomsae_recognized_pair_team_age_tier, kyorugi_weight_tier, country_code, full_name]
   }
 
   # ---------------------------------------------------------------------------
@@ -186,6 +363,7 @@ view: dim_athletes {
       WHEN ${athlete_age} BETWEEN 61 AND 65 THEN 'Under 65 (61-65 yrs)'
       ELSE 'Over 65 (66+ yrs)'
     END ;;
+    drill_fields: [full_name, athlete_age, gender, country_code]
   }
 
   dimension: poomsae_recognized_pair_team_sort {
@@ -219,6 +397,7 @@ view: dim_athletes {
       WHEN ${athlete_age} BETWEEN 51 AND 60 THEN 'Under 60 (51-60 yrs)'
       ELSE '61+ Years Old'
     END ;;
+    drill_fields: [poomsae_recognized_age_tier, full_name, athlete_age, gender, country_code]
   }
 
   dimension: poomsae_freestyle_age_sort {
@@ -244,6 +423,7 @@ view: dim_athletes {
       WHEN ${athlete_age} BETWEEN 12 AND 17 THEN 'Under 17 (12-17 yrs)'
       ELSE 'Over 17 (18+ yrs)'
     END ;;
+    drill_fields: [poomsae_recognized_age_tier, full_name, athlete_age, gender, country_code]
   }
 
   # ---------------------------------------------------------------------------
@@ -274,6 +454,7 @@ view: dim_athletes {
       WHEN ${athlete_age} BETWEEN 15 AND 17 THEN 'Junior Division (15-17 yrs)'
       ELSE 'Senior Division (18+ yrs)'
     END ;;
+    drill_fields: [kyorugi_weight_tier, gender, full_name, country_code]
   }
 
   dimension: kyorugi_weight_tier_sort {
@@ -402,6 +583,7 @@ view: dim_athletes {
         END
       ELSE 'Unclassified'
     END ;;
+    drill_fields: [kyorugi_division_weight_bracket, full_name, country_code, athlete_age]
   }
 
   dimension: kyorugi_division_weight_bracket {
@@ -484,7 +666,7 @@ view: dim_athletes {
   measure: count {
     type: count
     description: "Total count of registered athletes"
-    drill_fields: [athlete_id, full_name, wt_member_license, country_code, primary_discipline, kyorugi_weight_tier, poomsae_recognized_age_tier, athlete_status]
+    drill_fields: [athlete_id, full_name, country_code, athlete_age, primary_discipline, kyorugi_weight_tier, poomsae_recognized_age_tier, poomsae_recognized_pair_team_age_tier, athlete_status]
   }
 
   measure: active_athlete_count {
@@ -492,7 +674,7 @@ view: dim_athletes {
     description: "Count of active registered athletes eligible for sanctioned World Taekwondo competition"
     synonyms: ["eligible athletes", "active competitors"]
     filters: [athlete_status: "Active"]
-    drill_fields: [athlete_id, full_name, wt_member_license, country_code, primary_discipline, kyorugi_weight_tier, poomsae_recognized_age_tier]
+    drill_fields: [athlete_id, full_name, country_code, athlete_age, primary_discipline, kyorugi_weight_tier, poomsae_recognized_age_tier, poomsae_recognized_pair_team_age_tier]
   }
 
   measure: count_distinct_nations {

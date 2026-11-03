@@ -18,6 +18,55 @@ view: dim_tournaments {
     type: string
     description: "Official title of the championship or tournament"
     sql: ${TABLE}.tournament_name ;;
+    drill_fields: [level, location_full, start_date, discipline]
+
+    link: {
+      label: "🏅 View Full Tournament Leaderboard & Medalists"
+      url: "/explore/world_taekwondo/tournament_performance?fields=tournament_performance.rank_achieved,tournament_performance.medal_color,dim_athletes.full_name,dim_athletes.country_code,tournament_performance.discipline,tournament_performance.weight_or_form_class,tournament_performance.points_awarded&f[dim_tournaments.tournament_name]={{ value | encode_uri }}&sorts=tournament_performance.points_awarded+desc,tournament_performance.rank_achieved+asc&limit=50"
+      icon_url: "https://www.google.com/s2/favicons?domain=looker.com&sz=64"
+    }
+
+    action: {
+      label: "🎥 Request Courtside Score Sheet & Video Replay"
+      url: "https://httpbin.org/post"
+      icon_url: "https://www.google.com/s2/favicons?domain=olympics.com&sz=64"
+      param: {
+        name: "tournament_name"
+        value: "{{ value }}"
+      }
+      form_param: {
+        name: "event_name"
+        label: "Sanctioned Championship"
+        type: string
+        required: yes
+        default: "{{ value }}"
+      }
+      form_param: {
+        name: "artifact_type"
+        label: "Requested Official Record"
+        type: select
+        required: yes
+        default: "poomsae_judge_sheet"
+        option: {
+          name: "poomsae_judge_sheet"
+          label: "Poomsae 5-Judge Accuracy & Presentation Score Sheet"
+        }
+        option: {
+          name: "ivr_video_replay"
+          label: "Instant Video Replay (IVR) Court Footage"
+        }
+        option: {
+          name: "official_draw_bracket"
+          label: "Certified Seeding & Draw Bracket PDF"
+        }
+      }
+      form_param: {
+        name: "notes"
+        label: "Technical Delegate Request Note"
+        type: textarea
+        default: "Please share official court scoring logs for {{ value }} for high-performance review."
+      }
+    }
   }
 
   dimension: level {

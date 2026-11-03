@@ -84,13 +84,13 @@ view: fact_tournament_results {
   measure: count {
     type: count
     description: "Total result entries (tournaments entered by athletes)"
-    drill_fields: [result_id, tournament_id, athlete_id, division_category, weight_or_form_class, rank_achieved, medal_color, points_awarded]
+    drill_fields: [tournament_result_drill_detail*]
   }
 
   measure: tournaments_entered {
     type: count
     description: "Total individual tournament participations across athletes"
-    drill_fields: [tournament_id, athlete_id, medal_color]
+    drill_fields: [tournament_result_drill_detail*]
   }
 
   measure: total_tournament_points {
@@ -98,34 +98,129 @@ view: fact_tournament_results {
     description: "Total ranking points accumulated across tournament results"
     sql: ${points_awarded} ;;
     value_format_name: decimal_2
+    drill_fields: [tournament_result_drill_detail*]
+
+    link: {
+      label: "📈 Open Monthly World Ranking Trajectory"
+      url: "/explore/world_taekwondo/athlete_rankings?fields=athlete_rankings.snapshot_month,dim_athletes.full_name,dim_athletes.country_code,athlete_rankings.ranking_category,athlete_rankings.weight_or_form_class,athlete_rankings.current_rank,athlete_rankings.rank_delta_symbol,athlete_rankings.total_points,athlete_rankings.rank_movement_status{% if dim_athletes.full_name._in_query %}&f[dim_athletes.full_name]={{ dim_athletes.full_name._value | encode_uri }}{% elsif dim_athletes.country_code._in_query %}&f[dim_athletes.country_code]={{ dim_athletes.country_code._value | encode_uri }}{% endif %}&sorts=athlete_rankings.snapshot_month+desc&limit=24"
+      icon_url: "https://www.google.com/s2/favicons?domain=looker.com&sz=64"
+    }
+
+    action: {
+      label: "🏆 Approve 2026 WT High-Performance Grant (POL-WT-2026-HP08)"
+      url: "https://httpbin.org/post"
+      icon_url: "https://www.google.com/s2/favicons?domain=cloud.google.com&sz=64"
+      param: {
+        name: "policy_id"
+        value: "POL-WT-2026-HP08"
+      }
+      param: {
+        name: "verified_points"
+        value: "{{ value }}"
+      }
+      form_param: {
+        name: "athlete_recipient"
+        label: "Eligible Athlete / Cohort"
+        type: string
+        required: yes
+        default: "{% if dim_athletes.full_name._in_query %}{{ dim_athletes.full_name._value }}{% if dim_athletes.country_code._in_query %} ({{ dim_athletes.country_code._value }}){% endif %}{% else %}Selected WT Cohort{% endif %}"
+      }
+      form_param: {
+        name: "grant_tier"
+        label: "Policy Stipend Tier & Retention Uplift"
+        type: select
+        required: yes
+        default: "{% if value >= 200 %}platinum_uplift{% elsif value >= 140 %}gold_uplift{% elsif value >= 100 %}silver_standard{% else %}development_review{% endif %}"
+        option: {
+          name: "platinum_uplift"
+          label: "Platinum + 20% Pair/Team Under 50 Uplift ($30,000 USD — ≥200 pts)"
+        }
+        option: {
+          name: "gold_uplift"
+          label: "Gold + 20% Pair/Team Under 50 Uplift ($18,000 USD — 140–199.99 pts)"
+        }
+        option: {
+          name: "silver_standard"
+          label: "Silver Stipend ($7,500 USD — 100–139.99 pts)"
+        }
+        option: {
+          name: "development_review"
+          label: "MNA Development Exception Review (<100 pts)"
+        }
+      }
+      form_param: {
+        name: "disbursement_channel"
+        label: "Disbursement Channel"
+        type: select
+        required: yes
+        default: "mna_high_performance"
+        option: {
+          name: "mna_high_performance"
+          label: "Member National Association (MNA) High-Performance Account"
+        }
+        option: {
+          name: "wt_athlete_escrow"
+          label: "World Taekwondo Athlete Trust Escrow"
+        }
+      }
+      form_param: {
+        name: "approval_notes"
+        label: "Commission Justification & Compliance Note"
+        type: textarea
+        required: yes
+        default: "Approved under POL-WT-2026-HP08 based on {{ rendered_value }} verified Looker tournament points{% if dim_athletes.poomsae_recognized_pair_team_age_tier._in_query %} in {{ dim_athletes.poomsae_recognized_pair_team_age_tier._value }}{% endif %}. WADA ADAMS & Knowledge Catalog athlete PII protections verified."
+      }
+    }
+
+    action: {
+      label: "⚡ Certify Points Ledger for Championship Seeding (1-Click)"
+      url: "https://httpbin.org/post"
+      icon_url: "https://www.google.com/s2/favicons?domain=olympics.com&sz=64"
+      param: {
+        name: "action_type"
+        value: "certify_seeding_points"
+      }
+      param: {
+        name: "athlete_name"
+        value: "{{ dim_athletes.full_name._value }}"
+      }
+      param: {
+        name: "country_code"
+        value: "{{ dim_athletes.country_code._value }}"
+      }
+      param: {
+        name: "certified_points"
+        value: "{{ rendered_value }}"
+      }
+    }
   }
 
   measure: gold_medal_count {
     type: count
     description: "Total Gold medals awarded"
     filters: [medal_color: "Gold"]
-    drill_fields: [athlete_id, tournament_id, weight_or_form_class]
+    drill_fields: [tournament_result_drill_detail*]
   }
 
   measure: silver_medal_count {
     type: count
     description: "Total Silver medals awarded"
     filters: [medal_color: "Silver"]
-    drill_fields: [athlete_id, tournament_id, weight_or_form_class]
+    drill_fields: [tournament_result_drill_detail*]
   }
 
   measure: bronze_medal_count {
     type: count
     description: "Total Bronze medals awarded"
     filters: [medal_color: "Bronze"]
-    drill_fields: [athlete_id, tournament_id, weight_or_form_class]
+    drill_fields: [tournament_result_drill_detail*]
   }
 
   measure: total_medals {
     type: count
     description: "Total podium finishes (Gold, Silver, and Bronze)"
     filters: [medal_color: "Gold, Silver, Bronze"]
-    drill_fields: [athlete_id, tournament_id, medal_color, weight_or_form_class]
+    drill_fields: [tournament_result_drill_detail*]
   }
 
   measure: gold_medal_rate {
@@ -133,6 +228,7 @@ view: fact_tournament_results {
     description: "Gold medal conversion rate: count(gold medals) / count(tournaments entered)"
     sql: SAFE_DIVIDE(${gold_medal_count}, NULLIF(${tournaments_entered}, 0)) ;;
     value_format_name: percent_1
+    drill_fields: [tournament_result_drill_detail*]
   }
 
   measure: podium_finish_rate {
@@ -140,6 +236,7 @@ view: fact_tournament_results {
     description: "Podium conversion rate: count(medals) / count(tournaments entered)"
     sql: SAFE_DIVIDE(${total_medals}, NULLIF(${tournaments_entered}, 0)) ;;
     value_format_name: percent_1
+    drill_fields: [tournament_result_drill_detail*]
   }
 
   measure: average_points_per_athlete {
@@ -147,11 +244,35 @@ view: fact_tournament_results {
     description: "Average tournament ranking points awarded per participating athlete"
     sql: SAFE_DIVIDE(${total_tournament_points}, NULLIF(COUNT(DISTINCT ${athlete_id}), 0)) ;;
     value_format_name: decimal_2
+    drill_fields: [tournament_result_drill_detail*]
   }
 
   measure: count_participating_athletes {
     type: count_distinct
     description: "Count of unique athletes who participated in tournaments"
     sql: ${athlete_id} ;;
+    drill_fields: [dim_athletes.athlete_id, dim_athletes.full_name, dim_athletes.country_code, dim_athletes.athlete_age, dim_athletes.primary_discipline, dim_athletes.poomsae_recognized_pair_team_age_tier, dim_athletes.kyorugi_weight_tier, tournaments_entered, total_medals, total_tournament_points]
+  }
+
+  # ---------------------------------------------------------------------------
+  # Drill Sets
+  # ---------------------------------------------------------------------------
+  set: tournament_result_drill_detail {
+    fields: [
+      dim_tournaments.start_date,
+      dim_tournaments.tournament_name,
+      dim_tournaments.level,
+      dim_tournaments.location_full,
+      dim_athletes.full_name,
+      dim_athletes.country_code,
+      dim_athletes.athlete_age,
+      dim_athletes.poomsae_recognized_age_tier,
+      discipline,
+      division_category,
+      weight_or_form_class,
+      rank_achieved,
+      medal_color,
+      points_awarded
+    ]
   }
 }
