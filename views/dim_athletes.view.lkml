@@ -37,7 +37,7 @@ view: dim_athletes {
     type: string
     description: "Full registered competitor name"
     sql: ${TABLE}.full_name ;;
-    drill_fields: [athlete_id, gender, athlete_age, country_code, primary_discipline, poomsae_recognized_age_tier, poomsae_recognized_pair_team_age_tier, kyorugi_weight_tier]
+    drill_fields: [gender, athlete_age, country_code]
 
     link: {
       label: "🥋 View All Tournament & Medal Results"
