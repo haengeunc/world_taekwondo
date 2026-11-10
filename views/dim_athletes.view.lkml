@@ -59,10 +59,6 @@ view: dim_athletes {
         name: "athlete_name"
         value: "{{ value }}"
       }
-      param: {
-        name: "country_code"
-        value: "{{ country_code._value }}"
-      }
       form_param: {
         name: "channel"
         label: "Notification Channel"
@@ -106,7 +102,7 @@ view: dim_athletes {
         label: "Call-Up Briefing Message"
         type: textarea
         required: yes
-        default: "Nominating {{ value }}{% if country_code._in_query %} ({{ country_code._value }}){% endif %} for national squad selection{% if poomsae_recognized_pair_team_age_tier._in_query %} in {{ poomsae_recognized_pair_team_age_tier._value }}{% endif %}{% if tournament_performance.total_tournament_points._in_query %} with {{ tournament_performance.total_tournament_points._rendered_value }} verified tournament points{% endif %}."
+        default: "Nominating {{ value }} for national squad selection."
       }
     }
 
@@ -164,7 +160,7 @@ view: dim_athletes {
         name: "referee_notes"
         label: "Class 1 / Class 2 International Referee Notes"
         type: textarea
-        default: "Queue video review for {{ value }}{% if country_code._in_query %} ({{ country_code._value }}){% endif %} ahead of Pair & Team championship seeding."
+        default: "Queue video review for {{ value }} ahead of Pair & Team championship seeding."
       }
     }
   }

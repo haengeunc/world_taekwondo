@@ -102,7 +102,7 @@ view: fact_tournament_results {
 
     link: {
       label: "📈 Open Monthly World Ranking Trajectory"
-      url: "/explore/world_taekwondo/athlete_rankings?fields=athlete_rankings.snapshot_month,dim_athletes.full_name,dim_athletes.country_code,athlete_rankings.ranking_category,athlete_rankings.weight_or_form_class,athlete_rankings.current_rank,athlete_rankings.rank_delta_symbol,athlete_rankings.total_points,athlete_rankings.rank_movement_status{% if dim_athletes.full_name._in_query %}&f[dim_athletes.full_name]={{ dim_athletes.full_name._value | encode_uri }}{% elsif dim_athletes.country_code._in_query %}&f[dim_athletes.country_code]={{ dim_athletes.country_code._value | encode_uri }}{% endif %}&sorts=athlete_rankings.snapshot_month+desc&limit=24"
+      url: "/explore/world_taekwondo/athlete_rankings?fields=athlete_rankings.snapshot_month,dim_athletes.full_name,dim_athletes.country_code,athlete_rankings.ranking_category,athlete_rankings.weight_or_form_class,athlete_rankings.current_rank,athlete_rankings.rank_delta_symbol,athlete_rankings.total_points,athlete_rankings.rank_movement_status{% if dim_athletes.full_name._in_query %}&f[dim_athletes.full_name]={{ _filters['dim_athletes.full_name'] | url_encode }}{% elsif dim_athletes.country_code._in_query %}&f[dim_athletes.country_code]={{ _filters['dim_athletes.country_code'] | url_encode }}{% endif %}&sorts=athlete_rankings.snapshot_month+desc&limit=24"
       icon_url: "https://www.google.com/s2/favicons?domain=looker.com&sz=64"
     }
 
@@ -123,7 +123,7 @@ view: fact_tournament_results {
         label: "Eligible Athlete / Cohort"
         type: string
         required: yes
-        default: "{% if dim_athletes.full_name._in_query %}{{ dim_athletes.full_name._value }}{% if dim_athletes.country_code._in_query %} ({{ dim_athletes.country_code._value }}){% endif %}{% else %}Selected WT Cohort{% endif %}"
+        default: "Selected WT Athlete / Cohort ({{ rendered_value }} pts)"
       }
       form_param: {
         name: "grant_tier"
@@ -168,7 +168,7 @@ view: fact_tournament_results {
         label: "Commission Justification & Compliance Note"
         type: textarea
         required: yes
-        default: "Approved under POL-WT-2026-HP08 based on {{ rendered_value }} verified Looker tournament points{% if dim_athletes.poomsae_recognized_pair_team_age_tier._in_query %} in {{ dim_athletes.poomsae_recognized_pair_team_age_tier._value }}{% endif %}. WADA ADAMS & Knowledge Catalog athlete PII protections verified."
+        default: "Approved under POL-WT-2026-HP08 based on {{ rendered_value }} verified Looker tournament points. WADA ADAMS & Knowledge Catalog athlete PII protections verified."
       }
     }
 
@@ -179,14 +179,6 @@ view: fact_tournament_results {
       param: {
         name: "action_type"
         value: "certify_seeding_points"
-      }
-      param: {
-        name: "athlete_name"
-        value: "{{ dim_athletes.full_name._value }}"
-      }
-      param: {
-        name: "country_code"
-        value: "{{ dim_athletes.country_code._value }}"
       }
       param: {
         name: "certified_points"
