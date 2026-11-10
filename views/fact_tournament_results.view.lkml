@@ -94,8 +94,9 @@ view: fact_tournament_results {
   }
 
   measure: total_tournament_points {
+    label: "Total Tournament Ranking Points"
     type: sum
-    description: "Total ranking points accumulated across tournament results"
+    description: "Total ranking points accumulated across tournament results. Used to evaluate 2026 WT High-Performance Grant (POL-WT-2026-HP08) tiers: Platinum (>= 200 pts, $30,000 USD with 20% Pair/Team Under 50 uplift), Gold (140-199.99 pts, $18,000 USD with uplift), and Silver (100-139.99 pts, $7,500 USD)."
     sql: ${points_awarded} ;;
     value_format_name: decimal_2
     drill_fields: [tournament_result_drill_detail*]

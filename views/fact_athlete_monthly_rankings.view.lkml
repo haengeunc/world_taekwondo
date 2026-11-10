@@ -114,15 +114,17 @@ view: fact_athlete_monthly_rankings {
   }
 
   measure: total_points {
+    label: "Total Monthly Snapshot Ranking Points"
     type: sum
-    description: "Sum of global ranking points"
+    description: "Sum of official monthly World/Olympic ranking points for the selected snapshot month (distinct from cumulative tournament_performance.total_tournament_points)."
     sql: ${total_ranking_points} ;;
     value_format_name: decimal_2
   }
 
   measure: average_points_per_athlete {
+    label: "Average Monthly Ranking Points per Athlete"
     type: average
-    description: "Average ranking points per athlete"
+    description: "Average monthly snapshot ranking points per ranked athlete"
     sql: ${total_ranking_points} ;;
     value_format_name: decimal_2
   }
