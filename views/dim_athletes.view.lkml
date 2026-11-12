@@ -662,7 +662,7 @@ view: dim_athletes {
   measure: count {
     type: count
     description: "Total count of registered athletes"
-    drill_fields: [athlete_id, full_name, country_code, athlete_age, primary_discipline, kyorugi_weight_tier, poomsae_recognized_age_tier, poomsae_recognized_pair_team_age_tier, athlete_status]
+    drill_fields: [athlete_id, full_name, country_code, athlete_age, primary_discipline, athlete_status]
   }
 
   measure: active_athlete_count {
