@@ -35,12 +35,6 @@ view: fact_athlete_monthly_rankings {
     sql: ${TABLE}.ranking_category ;;
   }
 
-  dimension: division_name {
-    type: string
-    description: "Division classification, e.g. Olympic Senior Division"
-    sql: ${TABLE}.division_name ;;
-  }
-
   dimension: weight_or_form_class {
     type: string
     description: "Weight category or Poomsae discipline (e.g. M-58 kg, F-49 kg, Individual Recognized)"

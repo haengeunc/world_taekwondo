@@ -32,12 +32,6 @@ view: fact_tournament_results {
     sql: ${TABLE}.discipline ;;
   }
 
-  dimension: division_category {
-    type: string
-    description: "Competition age division: Senior, Junior, Cadet, Under 30, Under 40"
-    sql: ${TABLE}.division_category ;;
-  }
-
   dimension: weight_or_form_class {
     type: string
     description: "Weight category or recognized/freestyle form class (e.g. M-58 kg, F-49 kg, Individual Recognized)"
@@ -260,8 +254,8 @@ view: fact_tournament_results {
       dim_athletes.country_code,
       dim_athletes.athlete_age,
       dim_athletes.poomsae_recognized_age_tier,
+      dim_athletes.poomsae_recognized_pair_team_age_tier,
       discipline,
-      division_category,
       weight_or_form_class,
       rank_achieved,
       medal_color,
